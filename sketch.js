@@ -1,89 +1,48 @@
-//Objetos do jogo
-let imageBackground,
-    imagePerson,
-    imageEnemy,
-    imageGameOver,
-    soundTrail,
-    soundJump;
-
-//Classes
-let cenario,
-    personagem,
-    inimigo,
-    generatorMatrix,
-    gameOver;
-
-let countJump = 0;
-
 function preload() {
-  imageBackground = loadImage('imagens/cenario/floresta.png');
-  imagePerson = loadImage('imagens/personagem/correndo.png');
-  imageEnemy = loadImage('imagens/inimigos/gotinha.png');
+  imageForestBack = loadImage('imagens/cenario/parallax-forest-back-trees.png');
+  imageForestFront = loadImage('imagens/cenario/parallax-forest-front-trees.png');
+  imageForestLight = loadImage('imagens/cenario/parallax-forest-lights.png');
+  imageForestMiddle = loadImage('imagens/cenario/parallax-forest-middle-trees.png');
+
+
+  imagePerson = loadImage('imagens/personagem/gato_correndo_sprite.png');
+  imageEnemyMouse = loadImage('imagens/inimigos/rato_correndo_sprite.png');
+  imageEnemyDog = loadImage('imagens/inimigos/cachorro_correndo_sprite.png');
+  imageEnemyBat = loadImage('imagens/inimigos/morcego_sprite.png');
   imageGameOver = loadImage('imagens/assets/game-over.png');
+  imageLife = loadImage('imagens/assets/vida_gato.png');
+  imageHomeScreen = loadImage('imagens/cenario/telainicial.png');
+
+  fontHomeScreen = loadFont('imagens/assets/fonteTelaInicial.otf');
+
   soundTrail = loadSound('sons/trilha_jogo.mp3');
-  soundJump = loadSound('sons/somPulo.mp3');
+
+  cartuchoPrimeiraFase = loadJSON('cartucho/primeira_fase.json');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   
-  cenario = new Cenario(imageBackground, 3);
-  generatorMatrix = new GeneratorMatrix();
-  
-  personagem = new Personagem({
-    matrixAnimation: generatorMatrix.getMatrix(imagePerson, 220, 270), 
-    image: imagePerson, 
-    position_x: 0, 
-    widthPerson: 110, 
-    heightPerson: 135, 
-    widthSprite: 220, 
-    heightSprite: 270
-  })
-  
-  inimigo = new Inimigo({
-    matrixAnimation: generatorMatrix.getMatrix(imageEnemy, 104, 104), 
-    image: imageEnemy, 
-    position_x: width - 52, 
-    widthPerson: 52, 
-    heightPerson: 52, 
-    widthSprite: 104, 
-    heightSprite: 104
-  });
-
+  jogo = new Jogo();
+  telaInicial = new TelaInicial(imageHomeScreen);
   gameOver = new GameOver(imageGameOver);
+
+  scenes = {
+      jogo: jogo,
+      telaInicial: telaInicial,
+      gameOver: gameOver
+  }
+
+  jogo.setup();
+  telaInicial.setup();
   
-  frameRate(40);
-  soundTrail.loop();
+  frameRate(20);
 }
 
 function keyPressed() {
-  if(keyCode == 32) {
-    countJump++;
-    let isFloor = personagem.isFloor();
-
-    if(isFloor) {
-      countJump = 0;
-    }
-    
-    if(countJump < 2) {
-      personagem.jump();
-      soundJump.play();
-    }
-  }
+  jogo.keyPressed();
 }
 
 function draw() {
-  cenario.display();
-  cenario.move();
-  
-  personagem.display();
-  personagem.applyGravity();
-  
-  inimigo.display();
-  inimigo.move(8);
-  
-  if(personagem.colliding(inimigo)) {
-    noLoop();
-    gameOver.display();
-  }
+  scenes[sceneCurrent].draw();
 }

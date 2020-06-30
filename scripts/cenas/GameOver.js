@@ -3,7 +3,7 @@ class GameOver {
         this._image = image;
     }
     
-    display () {
+    draw () {
         let x = (width - this._image.width)/2,
             y = (height - this._image.height)/2;
 

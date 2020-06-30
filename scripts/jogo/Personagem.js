@@ -1,27 +1,30 @@
 class Personagem extends Animacao {
-  constructor({matrixAnimation, image, position_x, widthPerson, heightPerson, widthSprite, heightSprite}) {
+  constructor({matrixAnimation, image, position_x, position_y, widthPerson, heightPerson, widthSprite, heightSprite}) {
     super({
       matrixAnimation: matrixAnimation, 
       image: image, 
       position_x: position_x, 
+      position_y: position_y,
       widthPerson: widthPerson, 
       heightPerson: heightPerson, 
       widthSprite: widthSprite, 
       heightSprite: heightSprite 
     });
     
-    this._yBase = height - this._height;
-    this._y = this._yBase;
+    this._yBase = this._y;
     this._hopSpeed = 0;
-    this._gravity = 3;
-  }
+    this._gravity = 2;
 
-  isFloor() {
-    return this._y == this._yBase;
+    this._countJump = 0;
+    this._damageTime = false;
   }
   
   jump() {
-    this._hopSpeed = -30;
+    if (this._countJump < 2) {
+      this._hopSpeed = -25;
+      this.soundJump.play();
+      this._countJump++;  
+    }
   }
   
   applyGravity() {
@@ -30,21 +33,35 @@ class Personagem extends Animacao {
     
     if(this._y > this._yBase) {
       this._y = this._yBase;
+      this._countJump = 0;
     }
+  }
+
+  _applyDamageTime() {
+    this._damageTime = true;
+
+    setTimeout(() => this._damageTime = false, 1000);
   }
   
   colliding(inimigo) {
-    const precision = 0.65;
+    if (this._damageTime) {
+      return false;
+    }
+
     const collision = collideRectRect(
       this._x,
       this._y,
-      this._width*precision,
-      this._height*precision,
+      this._width,
+      this._height,
       inimigo._x,
       inimigo._y,
-      inimigo._width*precision,
+      inimigo._width,
       inimigo._height
     );
+
+    if (collision) {
+      this._applyDamageTime();
+    }
     
     return collision;
   }
